@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración - Votación La Salle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js for interactive graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<style> :root {
+      --primary-black: #0a0a0a;
+      --secondary-black: #1a1a1a;
+      --accent-gold: #d4af37;
+      --accent-gold-hover: #b8941f;
+      --text-primary: #ffffff;
+      --text-secondary: #a3a3a3;
+      --text-muted: #6b7280;
+      --surface: #262626;
+      --surface-hover: #404040;
+      --border: #374151;
+      --shadow: rgba(212, 175, 55, 0.1);
+      --gradient: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      --success: #22c55e;
+      --error: #ef4444;
+
+      /* Category Colors for Admin Panel - Adjusted to match principal.html categories */
+      --category-arte-bg: #6b4e50; /* Matching Arte tag color */
+      --category-tecnologia-bg: #2a4d69; /* Matching Tecnología tag color */
+      --category-educacion-bg: #4a326a; /* Matching Educación tag color */
+      --category-social-bg: #6a3232; /* Matching Social tag color */
+      --category-ingenieria-bg: #326a6a; /* Matching Ingeniería tag color */
+      --category-ciencias-bg: #3a6b35; /* Matching Ciencias tag color */
+      --category-text-color: #ffffff; /* White text for category tags for better contrast */
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--primary-black);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    
+    .login-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--primary-black);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .login-card {
+      background: var(--secondary-black);
+      padding: 3rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      text-align: center;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .login-subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .password-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .password-input:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+    }
+
+    .login-btn {
+      background: var(--gradient);
+      color: var(--primary-black);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .back-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin-top: 1.5rem;
+      display: inline-block;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      color: var(--accent-gold);
+    }
+
+    
+    .admin-container {
+      display: none; 
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .admin-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+    }
+
+    .admin-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .admin-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent-gold);
+    }
+
+    .action-btn.primary {
+      background: var(--gradient);
+      color: var(--primary-black);
+      border-color: transparent;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: var(--secondary-black);
+      padding: 2rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+    }
+
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+
+    .results-section, .chart-section {
+      background: var(--secondary-black);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      background: var(--surface);
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: var(--accent-gold);
+    }
+
+    .last-updated {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .project-row {
+      padding: 2rem;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: auto 1fr auto; 
+      gap: 2rem;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+
+    .project-row:hover {
+      background: rgba(212, 175, 55, 0.05);
+    }
+
+    .project-row:last-child {
+      border-bottom: none;
+    }
+
+    .project-rank {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+    }
+
+    .rank-number {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--accent-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .rank-medal {
+      font-size: 1.5rem;
+    }
+
+    .project-info {
+      min-width: 0; 
+    }
+
+    .project-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .project-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .project-category-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 5px;
+      margin-left: 0.5rem; /* Adjusted margin for admin panel */
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--category-text-color); /* Ensure text is readable */
+    }
+
+    /* Category tag styles for admin panel, matching principal.html categories */
+    .project-category-tag.arte { background-color: var(--category-arte-bg); }
+    .project-category-tag.tecnologia { background-color: var(--category-tecnologia-bg); }
+    .project-category-tag.educacion { background-color: var(--category-educacion-bg); }
+    .project-category-tag.social { background-color: var(--category-social-bg); }
+    .project-category-tag.ingenieria { background-color: var(--category-ingenieria-bg); }
+    .project-category-tag.ciencias { background-color: var(--category-ciencias-bg); }
+
+
+    .progress-container {
+      margin-top: 1rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient);
+      transition: width 0.8s ease;
+      border-radius: 4px;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .vote-stats {
+      text-align: right;
+      min-width: 120px;
+    }
+
+    .vote-count {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-bottom: 0.25rem;
+    }
+
+    .vote-percentage {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .user-info-section {
+      background: var(--secondary-black);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .user-info-title {
+      color: var(--accent-gold);
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .user-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .no-votes {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .no-votes-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .chart-container {
+        padding: 2rem;
+        max-height: 500px; /* Limit height for scrollability if many projects */
+        position: relative;
+    }
+
+    .chart-container canvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .export-options {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .export-options select {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .export-options select:focus {
+        outline: none;
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+
+    .results-search-container {
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .results-search-container input {
+        flex-grow: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .results-search-container input:focus {
+        outline: none;
+        border-color: var(--accent-gold);
+        box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+
+
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: 1rem;
+      }
+      
+      .admin-title {
+        font-size: 2rem;
+      }
+      
+      .project-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .admin-nav {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .admin-actions {
+        justify-content: center;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .export-options {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }</style>
+
+<div class="login-container" id="loginContainer">
+  <div class="login-card">
+    <h1 class="login-title">Panel de Administración</h1>
+    <p class="login-subtitle">Ingrese la contraseña para acceder a los resultados de votación</p>
+    
+    <form class="login-form" id="loginForm">
+      <input 
+        type="password" 
+        class="password-input" 
+        id="passwordInput"
+        placeholder="Contraseña de administrador"
+        autocomplete="current-password"
+        aria-label="Contraseña de administrador"
+      >
+      <button type="submit" class="login-btn" aria-label="Acceder al panel de administración">Acceder</button>
+      <div class="error-message" id="errorMessage" role="alert" aria-live="assertive">
+        Contraseña incorrecta. Inténtalo de nuevo.
+      </div>
+    </form>
+    
+    <a href="index.html" class="back-link" aria-label="Volver a la página de votación">← Volver a la votación</a>
+  </div>
+</div>
+
+
+<div class="admin-container" id="adminContainer">
+  <header class="admin-header">
+    <h1 class="admin-title">Panel de Administración</h1>
+    <p class="admin-subtitle">Resultados de Votación en Tiempo Real</p>
+  </header>
+
+  <nav class="admin-nav">
+    <div class="admin-actions">
+      <button class="action-btn primary" onclick="refreshData()" aria-label="Actualizar datos">
+        🔄 Actualizar Datos
+      </button>
+      <div class="export-options">
+        <label for="exportFormat" class="sr-only">Formato de exportación</label>
+        <select id="exportFormat" aria-label="Seleccionar formato de exportación">
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+        </select>
+        <button class="action-btn" onclick="exportResults()" aria-label="Exportar resultados">
+            📊 Exportar Resultados
+        </button>
+      </div>
+      <button class="action-btn" onclick="confirmResetVotes()" aria-label="Reiniciar todos los votos">
+        🗑️ Reiniciar Votos
+      </button>
+      <a href="index.html" class="action-btn" aria-label="Volver a la página de votación">
+        ← Volver a Votación
+      </a>
+    </div>
+    <div class="last-updated" id="lastUpdated" role="status" aria-live="polite">
+      Última actualización: Cargando...
+    </div>
+  </nav>
+
+  <div class="stats-grid" id="statsGrid" role="region" aria-labelledby="statsTitle">
+    <h2 id="statsTitle" class="sr-only">Estadísticas Generales</h2>
+  </div>
+
+  <div class="chart-section">
+    <div class="section-header">
+      <h2 class="section-title">Gráfico de Votos por Proyecto</h2>
+    </div>
+    <div class="chart-container">
+      <canvas id="votesChart" aria-label="Gráfico de barras de votos por proyecto"></canvas>
+    </div>
+  </div>
+
+  <div class="results-section">
+    <div class="section-header">
+      <h2 class="section-title">Resultados por Proyecto</h2>
+      <span class="last-updated" id="resultsTimestamp" role="status" aria-live="polite"></span>
+    </div>
+    <div class="results-search-container">
+        <label for="resultsSearchInput" class="sr-only">Buscar en resultados</label>
+        <input type="text" id="resultsSearchInput" placeholder="Buscar proyecto en resultados..." aria-label="Buscar proyecto en la tabla de resultados">
+    </div>
+    <div id="resultsContainer" role="table" aria-label="Tabla de resultados de proyectos">
+      <!-- Project results will be loaded here by JavaScript -->
+    </div>
+  </div>
+
+  <div class="user-info-section" id="userInfoSection" style="display: none;" role="region" aria-labelledby="userInfoTitle">
+    <h3 class="user-info-title" id="userInfoTitle">Información del Último Votante</h3>
+    <div class="user-details" id="userDetails">
+      <!-- Last voter info will be loaded here by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const ADMIN_PASSWORD = 'Lasalle2025';
+  const MAX_LOGIN_ATTEMPTS = 3;
+  const LOCKOUT_TIME_MS = 5000; // 5 seconds
+
+  let loginAttempts = 0;
+  let lockoutTimer = null;
+
+  // Project data with added 'grade' and 'category' for filtering
+  // IMPORTANT: Ensure these project IDs and structure match the principal.html
+  const projects = [
+    { id: 'project1', name: 'En lo profundo del arte', description: 'María Citalan, Gabriela De León, Madelyn Corleto, Lilian Subuyuj', grade: '4D', category: 'Arte' },
+    { id: 'project2', name: 'Ventanas interactivas', description: 'Aniha Hernández, Mishell Girón, Evelyn Blanco', grade: '4D', category: 'Tecnología' },
+    { id: 'project3', name: 'Libro filosófico', description: 'Juan Morales, Daniel Aldana', grade: '4D', category: 'Educación' },
+    { id: 'project4', name: 'Jenga Gigante', description: 'Dayra Figueroa, Melany Luis, Dulce Cutuc, Alexia Sandoval', grade: '4D', category: 'Social' },
+    { id: 'project5', name: 'Helicóptero a escala', description: 'Josue Aguilar, Rene Pirir, Diana Sanchez, Abigail Tzúl', grade: '4A', category: 'Ingeniería' },
+    { id: 'project6', name: 'Robot Robin', description: 'Diana Gomez, Evelyn Pop, Maryori Marroquin, Freddy Solano', grade: '4A', category: 'Tecnología' },
+    { id: 'project7', name: 'Juego de Python', description: 'Kenneth Ramirez, Bryan Mejia, Valery Gonzales, Daniela Orellana', grade: '5A', category: 'Tecnología' },
+    { id: 'project8', name: 'Código Vital', description: 'Elvis Pulex, Wilson Velasquez, Fabian Ramirez, Daniel Galindo', grade: '5A', category: 'Ciencias' },
+    { id: 'project9', name: 'Go Kart Eléctrico', description: 'Sergio Romero, Claudia Monroy, Madelyn Pich, Rodrigo Diaz', grade: '5A', category: 'Ingeniería' },
+    { id: 'project10', name: 'Juego en grande', description: 'Anderson Garcia, Roberto Hernandez, Pablo Herrera, Ranndy Sinay', grade: '5A', category: 'Arte' },
+    { id: 'project11', name: 'Máquina expendedora inteligente', description: 'Sofia Castañon, Alison Chicoj, Miriam Noemi, Alejandra Adriano', grade: '5A', category: 'Tecnología' },
+    { id: 'project12', name: 'SignTech', description: 'Karen Sipac, Katherine Chiguichon, Darling Chicoj, Cristian Escriba', grade: '5B', category: 'Tecnología' },
+    { id: 'project13', name: 'Sclashdown', description: 'Juego de mesa estratégico con elementos digitales.', grade: '5B', category: 'Social' },
+    { id: 'project14', name: 'Agujero de gusano', description: 'Instalación artística que simula un agujero de gusano.', grade: '4C', category: 'Arte' },
+    { id: 'project15', name: 'Estelar y Robot de apoyo', description: 'Observatorio astronómico portátil y robot asistente.', grade: '4A', category: 'Ciencias' },
+    { id: 'project16', name: 'Sistema de Riego Inteligente', description: 'Sistema automatizado para optimizar el uso del agua.', grade: '4A', category: 'Tecnología' },
+    { id: 'project17', name: 'Juego lúdico inclusivo', description: 'Juego de mesa diseñado para personas con diversas habilidades.', grade: '4A', category: 'Social' },
+    { id: 'project18', name: 'Transporte Orgánico', description: 'Diseño de un sistema de transporte sostenible.', grade: '4A', category: 'Ingeniería' },
+    { id: 'project19', name: 'Ciudad del Futuro', description: 'Maqueta interactiva de una ciudad sostenible.', grade: '5C', category: 'Ingeniería' },
+    { id: 'project20', name: 'Clasificación de Residuos con IA', description: 'Sistema de visión artificial para separar basura.', grade: '5C', category: 'Tecnología' },
+    { id: 'project21', name: 'Cyber Pulse X', description: 'Plataforma de ciberseguridad para estudiantes.', grade: '5B', category: 'Tecnología' },
+  ];
+
+  const loginContainer = document.getElementById('loginContainer');
+  const adminContainer = document.getElementById('adminContainer');
+  const loginForm = document.getElementById('loginForm');
+  const passwordInput = document.getElementById('passwordInput');
+  const errorMessage = document.getElementById('errorMessage');
+  const statsGrid = document.getElementById('statsGrid');
+  const resultsContainer = document.getElementById('resultsContainer');
+  const lastUpdated = document.getElementById('lastUpdated');
+  const resultsTimestamp = document.getElementById('resultsTimestamp');
+  const userInfoSection = document.getElementById('userInfoSection');
+  const userDetails = document.getElementById('userDetails');
+  const resultsSearchInput = document.getElementById('resultsSearchInput');
+
+  let votesChartInstance = null; // To store the Chart.js instance
+
+  // Login form submission handler
+  loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (lockoutTimer) {
+      errorMessage.textContent = `Demasiados intentos fallidos. Intenta de nuevo en ${LOCKOUT_TIME_MS / 1000} segundos.`;
+      errorMessage.style.display = 'block';
+      return;
+    }
+
+    const password = passwordInput.value;
+    
+    if (password === ADMIN_PASSWORD) {
+      loginContainer.style.display = 'none';
+      adminContainer.style.display = 'block';
+      localStorage.setItem('admin_logged_in', 'true');
+      loginAttempts = 0; // Reset attempts on successful login
+      loadAdminData();
+    } else {
+      loginAttempts++;
+      errorMessage.textContent = `Contraseña incorrecta. Intentos restantes: ${MAX_LOGIN_ATTEMPTS - loginAttempts}`;
+      errorMessage.style.display = 'block';
+      passwordInput.value = '';
+      passwordInput.focus();
+      
+      passwordInput.style.borderColor = '#ef4444';
+      setTimeout(() => {
+        passwordInput.style.borderColor = '';
+        errorMessage.style.display = 'none';
+      }, 3000);
+
+      if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+        startLockout();
+      }
+    }
+  });
+
+  function startLockout() {
+    passwordInput.disabled = true;
+    loginForm.querySelector('button[type="submit"]').disabled = true;
+    errorMessage.textContent = `Demasiados intentos fallidos. Bloqueado por ${LOCKOUT_TIME_MS / 1000} segundos.`;
+    errorMessage.style.display = 'block';
+
+    lockoutTimer = setTimeout(() => {
+      passwordInput.disabled = false;
+      loginForm.querySelector('button[type="submit"]').disabled = false;
+      loginAttempts = 0;
+      lockoutTimer = null;
+      errorMessage.style.display = 'none';
+      passwordInput.focus();
+    }, LOCKOUT_TIME_MS);
+  }
+
+  // Authentication check removed
+
+  function loadAdminData() {
+    // Retrieve vote data for all projects from localStorage
+    const votesData = projects.map(project => ({
+      ...project,
+      votes: parseInt(localStorage.getItem(`${project.id}-votes`)) || 0
+    })).sort((a, b) => b.votes - a.votes); // Sort by votes descending
+
+    const totalVotes = votesData.reduce((sum, project) => sum + project.votes, 0);
+    
+    // Retrieve last voter information
+    const votedProjectID = localStorage.getItem('lasalle-voted-project');
+    const voteTimestamp = localStorage.getItem('lasalle-vote-timestamp');
+    const hasVotedAnyUser = localStorage.getItem('lasalle-voted') === 'true'; 
+
+    // Update statistics cards
+    updateStats(totalVotes, votesData);
+    
+    // Update project results table
+    updateResults(votesData, totalVotes);
+    
+    // Update last voter information
+    if (hasVotedAnyUser && votedProjectID && voteTimestamp) {
+      updateUserInfo(votedProjectID, voteTimestamp);
+    } else {
+      userInfoSection.style.display = 'none';
+    }
+    
+    // Update timestamps
+    updateTimestamp();
+
+    // Render chart
+    renderVotesChart(votesData);
+  }
+
+  function updateStats(totalVotes, votesData) {
+    const leadingProject = votesData[0] || { name: 'N/A', votes: 0 };
+    statsGrid.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-icon">🗳️</div>
+        <div class="stat-number">${totalVotes}</div>
+        <div class="stat-label">Total de Votos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💡</div>
+        <div class="stat-number">${projects.length}</div>
+        <div class="stat-label">Proyectos Activos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-number">${leadingProject.votes}</div>
+        <div class="stat-label">Votos Proyecto Líder (${leadingProject.name})</div>
+      </div>
+    `;
+  }
+
+  function updateResults(votesData, totalVotes) {
+    if (totalVotes === 0) {
+      resultsContainer.innerHTML = `
+        <div class="no-votes">
+          <div class="no-votes-icon">📊</div>
+          <p>Aún no hay votos registrados.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Filter results based on search input
+    const searchTerm = resultsSearchInput.value.toLowerCase().trim();
+    const filteredVotesData = votesData.filter(project => 
+        project.name.toLowerCase().includes(searchTerm) || 
+        project.description.toLowerCase().includes(searchTerm) ||
+        (project.category && project.category.toLowerCase().includes(searchTerm))
+    );
+
+    if (filteredVotesData.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="no-votes">
+                <div class="no-votes-icon">🔍</div>
+                <p>No se encontraron proyectos que coincidan con la búsqueda.</p>
+            </div>
+        `;
+        return;
+    }
+
+    resultsContainer.innerHTML = filteredVotesData.map((project, index) => {
+      const percentage = totalVotes > 0 ? ((project.votes / totalVotes) * 100).toFixed(1) : 0;
+      let medal = '';
+      if (index === 0) medal = '🥇';
+      else if (index === 1) medal = '🥈';
+      else if (index === 2) medal = '🥉';
+
+      // Map categories to the CSS classes defined in the style block
+      const categoryClass = project.category ? project.category.toLowerCase().replace(/ /g, '') : ''; // Remove spaces for class names
+      const categoryDisplayName = project.category ? project.category.charAt(0).toUpperCase() + project.category.slice(1) : '';
+
+      return `
+        <div class="project-row" role="row">
+          <div class="project-rank" role="cell">
+            <span class="rank-number">#${index + 1}</span>
+            <span class="rank-medal">${medal}</span>
+          </div>
+          <div class="project-info" role="cell">
+            <h4 class="project-name">${project.name}
+                ${project.category ? `<span class="project-category-tag ${categoryClass}">${categoryDisplayName}</span>` : ''}
+            </h4>
+            <p class="project-description">${project.description}</p>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: ${percentage}%"></div>
+              </div>
+              <div class="progress-text">${percentage}% de los votos</div>
+            </div>
+          </div>
+          <div class="vote-stats" role="cell">
+            <div class="vote-count">${project.votes}</div>
+            <div class="vote-percentage">votos</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateUserInfo(votedProjectID, voteTimestamp) {
+    const votedProjectName = projects.find(p => p.id === votedProjectID)?.name || 'Proyecto Desconocido';
+    const formattedTimestamp = new Date(voteTimestamp).toLocaleString('es-GT', {
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+
+    userInfoSection.style.display = 'block';
+    userDetails.innerHTML = `
+      <div class="detail-item">
+        <span class="detail-label">Último Proyecto Votado</span>
+        <span class="detail-value">${votedProjectName}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">Fecha y Hora del Voto</span>
+        <span class="detail-value">${formattedTimestamp}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">ID del Voto</span>
+        <span class="detail-value">${votedProjectID}</span>
+      </div>
+    `;
+  }
+
+  function updateTimestamp() {
+    const now = new Date().toLocaleString('es-GT', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    lastUpdated.textContent = `Última actualización: ${now}`;
+    resultsTimestamp.textContent = `Datos al: ${now}`;
+  }
+
+  function renderVotesChart(votesData) {
+    const ctx = document.getElementById('votesChart').getContext('2d');
+    const projectNames = votesData.map(p => p.name);
+    const projectVotes = votesData.map(p => p.votes);
+
+    // Define colors for chart bars based on category
+    const backgroundColors = votesData.map(p => {
+        switch (p.category) {
+            case 'Arte': return 'rgba(107, 78, 80, 0.8)'; // Matching Arte tag color
+            case 'Tecnología': return 'rgba(42, 77, 105, 0.8)'; // Matching Tecnología tag color
+            case 'Educación': return 'rgba(74, 50, 106, 0.8)'; // Matching Educación tag color
+            case 'Social': return 'rgba(106, 50, 50, 0.8)'; // Matching Social tag color
+            case 'Ingeniería': return 'rgba(50, 106, 106, 0.8)'; // Matching Ingeniería tag color
+            case 'Ciencias': return 'rgba(58, 107, 53, 0.8)'; // Matching Ciencias tag color
+            default: return 'rgba(212, 175, 55, 0.8)'; // Default gold
+        }
+    });
+    const borderColors = votesData.map(p => {
+        switch (p.category) {
+            case 'Arte': return 'rgba(107, 78, 80, 1)';
+            case 'Tecnología': return 'rgba(42, 77, 105, 1)';
+            case 'Educación': return 'rgba(74, 50, 106, 1)';
+            case 'Social': return 'rgba(106, 50, 50, 1)';
+            case 'Ingeniería': return 'rgba(50, 106, 106, 1)';
+            case 'Ciencias': return 'rgba(58, 107, 53, 1)';
+            default: return 'rgba(212, 175, 55, 1)';
+        }
+    });
+
+
+    if (votesChartInstance) {
+      votesChartInstance.destroy(); // Destroy existing chart instance
+    }
+
+    votesChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: projectNames,
+        datasets: [{
+          label: 'Número de Votos',
+          data: projectVotes,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y', // Horizontal bars
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: {
+              color: 'var(--text-secondary)' // Color for x-axis labels
+            },
+            grid: {
+              color: 'var(--border)' // Color for x-axis grid lines
+            }
+          },
+          y: {
+            ticks: {
+              color: 'var(--text-secondary)', // Color for y-axis labels
+              autoSkip: false, // Prevent labels from being skipped
+              maxRotation: 0, // Prevent rotation
+              minRotation: 0,
+              callback: function(value, index, values) {
+                // Truncate long labels if necessary
+                const label = this.getLabelForValue(value);
+                return label.length > 30 ? label.substring(0, 27) + '...' : label;
+              }
+            },
+            grid: {
+              color: 'var(--border)' // Color for y-axis grid lines
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false // Hide legend
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.x !== null) {
+                  label += context.parsed.x;
+                }
+                return label;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Event listener for search input in results section
+  resultsSearchInput.addEventListener('input', () => {
+    loadAdminData(); // Reload data to apply search filter
+  });
+
+  // Action buttons functions
+  window.refreshData = function() {
+    loadAdminData();
+  };
+
+  window.exportResults = function() {
+    const format = document.getElementById('exportFormat').value;
+    const votesData = projects.map(project => ({
+      id: project.id,
+      name: project.name,
+      description: project.description,
+      grade: project.grade, // Include grade
+      category: project.category, // Include category
+      votes: parseInt(localStorage.getItem(`${project.id}-votes`)) || 0
+    })).sort((a, b) => b.votes - a.votes);
+
+    let filename = `resultados_votacion_lasalle.${format}`;
+    let dataStr;
+
+    if (format === 'csv') {
+      let csvContent = "data:text/csv;charset=utf-8,ID,Nombre del Proyecto,Descripción,Grado/Sección,Categoría,Votos\n";
+      votesData.forEach(row => {
+        const descriptionEscaped = `"${row.description.replace(/"/g, '""')}"`; // Escape double quotes
+        csvContent += `${row.id},"${row.name}",${descriptionEscaped},"${row.grade || ''}","${row.category || ''}",${row.votes}\n`;
+      });
+      dataStr = encodeURI(csvContent);
+    } else if (format === 'json') {
+      dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(votesData, null, 2));
+    } else {
+      alert('Formato de exportación no soportado.');
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.setAttribute("href", dataStr);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    alert(`Resultados exportados a ${filename}`);
+  };
+
+  window.confirmResetVotes = function() {
+    if (confirm('¡ADVERTENCIA! Estás a punto de reiniciar TODOS los votos. Esta acción es IRREVERSIBLE y eliminará permanentemente todos los datos de votación para todos los usuarios. ¿Estás ABSOLUTAMENTE seguro de que deseas continuar?')) {
+      resetVotes();
+    }
+  };
+
+  function resetVotes() {
+    projects.forEach(project => {
+      localStorage.removeItem(`${project.id}-votes`);
+    });
+    localStorage.removeItem('lasalle-voted'); // Remove the user's voted status
+    localStorage.removeItem('lasalle-voted-project'); // Remove the specific project voted by user
+    localStorage.removeItem('lasalle-vote-timestamp'); // Remove the timestamp
+    localStorage.removeItem('admin_logged_in'); 
+    localStorage.removeItem('lasalle-visited'); // Also reset welcome modal for next user
+    alert('Todos los votos han sido reiniciados. Serás redirigido a la página de login.');
+    window.location.reload(); // Reloads the page, which will show the login screen
+  }
+})();
+</script>
+
+</body>
+</html>
+
+
+
